@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+      <title>title</title>
+      <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+      <style>
+
+      img{
+        width:100%;
+        display: block;
+        border:1px solid #eee;
+        margin:5px auto;
+      }
+      li{
+        background: #fff;
+        margin-top:10px;
+        padding: 10px 10px;
+        border-bottom:1px solid #ccc;
+      }
+      ul{
+        margin-top:5px;
+      }
+      [v-cloak]{
+        display: none;
+      }
+
+      ul li{
+        padding:0 10px;
+        line-height: 40px;
+        border-bottom:1px solid #eee;
+      }
+    button{
+      background: #ff7b10;
+      color:white;
+      line-height: 50px;
+      width:100vw;
+      position: fixed;
+      left:0;
+      bottom:0;
+    };
+    textarea{
+      vertical-align: middle;
+    }
+    *:focus {
+         outline: none;
+        background-color: transparent;
+     }
+    @media screen and (max-height: 500px) {
+    button {
+        display: none;
+    }
+}
+      </style>
+  </head>
+  <body>
+    <div id="applyAdd">
+      <ul>
+        <li>店名：<input v-model="shopName" type="text" required></li>
+        <li>店主：<input v-model="userName" type="text" required></li>
+        <li>地址：<input v-model="address" type="text" required></li>
+        <li>缩略图：<input v-model="imgThumb" type="text" ></li>
+        <li>联系方式：<input v-model="tel" type="text" required></li>
+        <li>众筹金额：<input v-model="count" type="text" required></li>
+        <li>简短介绍：<input  v-model="introduce" type="text"></iuput></li>
+      </ul>
+    <button @click="sure()">确定新增</button>
+    </div>
+
+  </body>
+  <script type="text/javascript" src="../script/api.js"></script>
+  <script type="text/javascript" src="../script/vue.js"></script>
+  <script type="text/javascript" src="../script/sha1.js"></script>
+    <script type="text/javascript">
+    var now = Date.now();
+    var appKey = SHA1("A6059380178175"+"UZ"+"67146762-27C1-E14A-1645-EB18063350E9"+"UZ"+now)+"."+now
+    window.headers={
+      "X-APICloud-AppId": "A6059380178175",
+      "X-APICloud-AppKey": appKey
+    }
+      apiready = function(){
+
+        var vue=new Vue({
+            el: '#applyAdd',
+            data:{
+              shopName:"",
+              userName:"",
+              address:"",
+              imgThumb:"",
+              tel:"",
+              count:"",
+              introduce:"",
+            list:[]
+          },
+          created:function(){
+
+
+          },
+          methods:{
+            sure:function(){
+              if(this.userName==""||this.name==""||this.address==""||this.tel==""||this.wangtCount==""){
+                alert('输入有误，请重试')
+                return false;
+              }
+              api.ajax({
+                  url: 'https://d.apicloud.com/mcm/api/TZlist/',
+                  method: 'post',
+                  headers:headers,
+                  data: {
+                      values: {
+                          shopUser: this.userName,
+                          shopName:this.shopName,
+                          imgThumb:this.imgThumb,
+                          address:this.address,
+                          tel:this.tel,
+                          wangtCount:this.count,
+                          introduce:this.introduce,
+                          investMan:"[]",
+                      },
+
+              }
+            },function(ret){
+              if(ret.id){
+                alert('新增成功')
+                api.pageParam.person.shopList.push(ret.id)
+                api.ajax({
+                    url: 'https://d.apicloud.com/mcm/api/user/'+api.pageParam.person.id,
+                    method: 'put',
+                    headers:headers,
+                    data: {
+                        values: {
+                            shopList:   api.pageParam.person.shopList
+                        },
+
+                    }
+                },function(ret, err){
+                    if (ret) {
+                        api.execScript({
+                                  name:'root', //这里root代表index.html
+                                  frameName:'user',
+                                  script:'reloadMe();'
+                          });
+                        api.closeWin({
+                            name: 'myShop'
+                        });
+
+                        api.closeWin();
+
+                    } else {
+                        alert( JSON.stringify( err ) );
+                    }
+                });
+
+              }
+            });
+
+            }
+          }
+        })
+
+
+      }
+  </script>
+  </html>

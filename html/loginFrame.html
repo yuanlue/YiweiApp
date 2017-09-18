@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+      <title>title</title>
+      <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+  </head>
+<style>
+body{
+  height:100vh;
+  padding-top:100px;
+  box-sizing: border-box;
+  overflow: hidden;
+  font-family: "微软雅黑";
+    background-color:#ff7b10;
+    color:white;
+}
+h1{
+  text-align: center;
+  color:white;
+  font-size:22px;
+}
+
+.username,.password{
+  width:80vw;
+
+  margin:10px auto;
+  background: white;
+  color:#000;
+  border-radius: 10px;
+  text-indent: 5px;
+  padding:5px 0;
+}
+.username{
+  margin-top:20px;
+}
+input{
+  margin-left:10px;
+}
+button{
+  background: #fff;
+  width:80vw;
+  margin:0 auto;
+  margin-top:50px;
+  border-radius: 10px;
+  padding:10px;
+  display: block;
+  border:1px solid #ccc;
+}
+*:focus {
+     outline: none;
+    background-color: transparent;
+ }
+</style>
+  <body>
+    <div id="login">
+    <h1>壹味登录界面</h1>
+    <div  class="username">用户名：<input v-model="userName" type="text" placeholder="请输入用户名"></div>
+    <div  class="password">密&nbsp;&nbsp;&nbsp;&nbsp;码：<input v-model="passWord" type="password" placeholder="请输入密码"></div>
+    <div class="opera">
+      <button @click="login()">登录</button>
+    </div>
+    </div>
+  </body>
+  <script type="text/javascript" src="../script/api.js"></script>
+  <script type="text/javascript" src="../script/vue.js"></script>
+    <script type="text/javascript" src="../script/sha1.js"></script>
+  <script type="text/javascript">
+      apiready = function(){
+
+        var now = Date.now();
+        var appKey = SHA1("A6059380178175"+"UZ"+"67146762-27C1-E14A-1645-EB18063350E9"+"UZ"+now)+"."+now
+        var app = new Vue({
+            el: '#login',
+            data: {
+              userName:"",
+              passWord:""
+            },
+            methods:{
+              login:function(){
+                var that = this
+
+              api.ajax({
+                  url: 'https://d.apicloud.com/mcm/api/user/login	',
+                  method: 'post',
+                  headers:{
+                    "X-APICloud-AppId": "A6059380178175",
+                    "X-APICloud-AppKey": appKey
+                  },
+                  data: {
+                      values: {
+                          'username': that.userName,
+                          'password':that.passWord                      }
+                  }
+              },function(ret, err){
+                  if (ret) {
+                    if(ret.userId){
+                      alert('登录成功')
+                      //登录界面
+                        //api.sendEvent广播登录成功事件
+                      api.closeWin({
+                          name: 'TZdetail'
+                      });
+
+                      $api.setStorage('user',ret);
+                      api.execScript({
+                                name:'root', //这里root代表index.html
+                                frameName:'user',
+                                script:'reloadMe();'
+                        });
+
+                      api.closeWin();
+
+
+                    }
+                  }
+              });
+
+
+              }
+            }
+          })
+      };
+  </script>
+  </html>

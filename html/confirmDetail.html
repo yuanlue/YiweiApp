@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+      <title>title</title>
+      <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+      <style>
+  body{
+    background: white;
+  }
+  .apply ul li{
+    padding:0 10px;
+    line-height: 50px;
+    border-bottom: 1px solid #eee;
+  }
+  .apply ul li input{
+    line-height: 50px;
+    margin-left:10px;
+      -webkit-tap-highlight-color:rgba(255,0,0,0);
+  }
+  .bottom{
+      position: fixed;
+      background: #ff7b10;
+      height:50px;
+      width:100%;
+      text-align:center;
+      color:white;
+      line-height: 50px;
+      bottom:0;
+  }
+  *:focus {
+       outline: none;
+      background-color: transparent;
+   }
+   @media screen and (max-height: 500px) {
+   .bottom {
+       display: none;
+   }
+}
+      </style>
+  </head>
+  <body>
+  <div class="apply">
+    <ul>
+      <li>姓名：<input v-model="name" type="text" placeholder="请输入您的姓名"></li>
+      <li>电话：<input v-model="tel" type="text" placeholder="请输入您的电话"></li>
+      <li>地址：<input v-model="address" type="text" placeholder="请输入您的地址"></li>
+      <li>投资金额（人民币）：<input  :max="wantCount" v-model="count" type="number" placeholder="请输入您的投资金额"></li>
+
+    </ul>
+    <div click="wantT" @click="confirm()" class="bottom">确定投资</div>
+
+  </div>
+  </body>
+  <script type="text/javascript" src="../script/api.js"></script>
+  <script type="text/javascript" src="../script/vue.js"></script>
+    <script type="text/javascript" src="../script/sha1.js"></script>
+  <script type="text/javascript">
+      apiready = function(){
+
+        userid=$api.getStorage('user').userId
+        var now = Date.now();
+        var appKey = SHA1("A6059380178175"+"UZ"+"67146762-27C1-E14A-1645-EB18063350E9"+"UZ"+now)+"."+now
+        var app=new Vue({
+          el: '.apply',
+          data: {
+              name:"",
+              tel:"",
+              address:"",
+              count:"",
+              wantCount:api.pageParam.obj.wangtCount,
+              list:[]
+          },
+          created:function(){
+            var that=this
+            api.ajax({
+                url: 'https://d.apicloud.com/mcm/api/user/'+userid,
+                method: 'get',
+                headers: {
+                  "X-APICloud-AppId": "A6059380178175",
+                  "X-APICloud-AppKey": appKey
+                },
+                data: {
+                    values: {
+
+                    }
+                }
+            },function(ret, err){
+                if (ret) {
+
+                  that.list=ret.ShopId
+                }
+            });
+          },
+          methods:{
+              confirm:function(){
+                if(!this.count){
+                  return false
+                  alert('请输入有效金额')
+                }
+                var that=this
+                var now =new Date()
+                arr=[];
+                if(JSON.parse(that.list).length>0){
+                JSON.parse(that.list).forEach(function(item){
+                  arr.push(item)
+                })}
+                invest=JSON.parse(that.list)
+
+                var investarr={
+                  id:api.pageParam.obj.id,
+                  count:that.count,
+                  time:now,
+                  name:that.name,
+                  address:that.address,
+                  tel:that.tel
+                }
+                arr.push(investarr)
+
+                api.ajax({
+                    url: 'https://d.apicloud.com/mcm/api/user/'+userid,
+                    method: 'put',
+                    headers: {
+                      "X-APICloud-AppId": "A6059380178175",
+                      "X-APICloud-AppKey": appKey
+                    },
+                    data: {
+                        values: {
+                            ShopId:JSON.stringify(arr)
+                        }
+                    }
+                },function(ret, err){
+                    if (ret) {
+
+                      arr=[];
+                      inarr=[]
+                      api.pageParam.obj.investId.forEach(function(item){
+                        arr.push(item)
+                      })
+
+                      if(JSON.parse(api.pageParam.obj.investMan).length>0){
+                      JSON.parse(api.pageParam.obj.investMan).forEach(function(item){
+                        inarr.push(item)
+                      })}
+                      var investarr={
+                        id:userid,
+                        count:that.count,
+                        time:now,
+                        name:that.name,
+                        address:that.address,
+                        tel:that.tel
+                      }
+                      inarr.push(investarr)
+                      var investarr=arr.push(ret.id)
+
+                        api.ajax({
+                            url: 'https://d.apicloud.com/mcm/api/TZlist/'+api.pageParam.obj.id,
+                            headers: {
+                              "X-APICloud-AppId": "A6059380178175",
+                              "X-APICloud-AppKey": appKey
+                            },
+                            method: 'put',
+                            data: {
+                                values: {
+                                    investId: arr,
+                                    investMan:JSON.stringify(inarr)
+                                },
+
+                            }
+                        },function(ret, err){
+                            if (ret) {
+                              alert('投资成功')
+                              api.closeToWin({
+                                  name: 'root'
+                              });
+                            }
+                            else{
+                            }
+                        });
+
+
+                    } else {
+                      alert('投资失败')
+                    }
+                });
+
+              }
+          }
+        })
+
+
+
+
+      };
+  </script>
+  </html>

@@ -1,0 +1,244 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,initial-scale=1.0,width=device-width"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>Hello APP</title>
+    <link rel="stylesheet" type="text/css" href="./css/api.css" />
+    <style type="text/css">
+    html,body{
+        height: 100%;
+    }
+
+  header{
+    height:50px;
+    background-color:#ff7b10;
+  }
+  header h1{
+    color:white;
+    text-align: center;
+    line-height: 50px;
+    font-size:16px;
+  }
+  .top{
+    height:25px;
+    background: black;
+  }
+
+    </style>
+</head>
+<body id="#app">
+  <div class="top"></div>
+  <header>
+      <h1>壹味-有味  </h1>
+
+  </header>
+</body>
+<script type="text/javascript" src="./script/api.js"></script>
+<script type="text/javascript">
+    apiready = function(){
+    var title=$api.dom('header h1')
+
+
+		//输出Log，Log将显示在APICloud Studio控制台
+  var NVTabBar = api.require('NVTabBar');
+  fullwidth=api.screenWidth
+
+  function changeNavPage(page){
+    api.openFrame({
+        name: page,
+        bounces: true,
+        url: './html/'+page+'.html',
+        cache:false,
+        bounces:true,
+        rect: {
+            x: 0,
+            y: 75,
+            w: 'auto',
+            h: api.winHeight-135
+        },
+        pageParam: {
+            name: 'test'
+        },
+        bgColor: 'rgba(0,0,0,0)',
+        vScrollBarEnabled: true,
+        hScrollBarEnabled: true
+    });
+  }
+  api.openFrame({
+      name: 'home',
+      url: './html/main.html',
+      rect: {
+          x: 0,
+          y: 75,
+          w: 'auto',
+          h: 'auto'
+      },
+      pageParam: {
+          name: 'test'
+      },
+      bounces: true,
+      bgColor: 'rgba(0,0,0,0)',
+      vScrollBarEnabled: true,
+      hScrollBarEnabled: true
+  });
+
+  NVTabBar.open({
+      styles: {
+          bg: '#ff7b10',
+          //bg:"widget://image/NVTabBar/tabbar_bg.png",
+          h: 65,
+          dividingLine: {
+              width: 0,
+              color: '#000'
+          },
+          badge: {
+              bgColor: '#ff7b10',
+              numColor: '#fff',
+              size: 6.0,
+              centerX: 40,
+              centerY: 6
+          }
+      },
+      items: [ {
+          w: api.winWidth / 4.0,
+          bg: {
+              marginB: 0,
+          },
+          iconRect: {
+              w: 25.0,
+              h: 25.0,
+          },
+          icon: {
+              normal: 'widget://image/home_active.png',
+              selected: 'widget://image/home.png'
+          },
+          title: {
+              text: '壹味-有味',
+              size: 14.0,
+              normal:"#fff",
+              selected: '#000'  ,
+              marginB: 6.0
+          }
+      }, {
+          w: api.winWidth / 4.0,
+          bg: {
+              marginB: 0,
+          },
+          iconRect: {
+              w: 25.0,
+              h: 25.0,
+          },
+          icon: {
+              normal: 'widget://image/start_active.png',
+              selected: 'widget://image/start.png'
+          },
+          title: {
+              text: '壹味-星店',
+              size: 14.0,
+              normal:"#fff",
+              selected: '#000'  ,
+              marginB: 6.0
+          }
+      }, {
+          w: api.winWidth / 4.0,
+          bg: {
+              marginB: 0,
+          },
+          iconRect: {
+              w: 25.0,
+              h: 25.0,
+          },
+          icon: {
+              normal: 'widget://image/shop_active.png',
+              selected: 'widget://image/shop.png'
+          },
+          title: {
+              text: '壹味-开啦',
+              size: 14.0,
+              normal:"#fff",
+              selected: '#000'  ,
+              marginB: 6.0
+          }
+      },{
+          w: api.winWidth / 4.0,
+          bg: {
+              marginB: 0,
+          },
+          iconRect: {
+              w: 25.0,
+              h: 25.0,
+          },
+          icon: {
+            normal: 'widget://image/user_active.png',
+            selected: 'widget://image/user.png'
+          },
+          title: {
+              text: '壹味-我的',
+              size: 14.0,
+              normal:"#fff",
+              selected: '#000'  ,
+              marginB: 6.0
+          }
+      }],
+      selectedIndex: 0
+  }, function(ret, err) {
+      if(ret.index==0){
+
+        $api.text(title,'壹味-有味')
+        api.openFrame({
+            name: 'home',
+            url: './html/main.html',
+            customRefreshHeader: 'UIPullRefreshMotive',
+            rect: {
+                x: 0,
+                y: 75,
+                w: 'auto',
+                  h: api.winHeight-135
+            },
+            pageParam: {
+                name: 'test'
+            },
+            bounces: true,
+            bgColor: 'rgba(0,0,0,0)',
+            vScrollBarEnabled: true,
+            hScrollBarEnabled: true,
+            reload:false
+        });
+      }
+      if(ret.index==1){
+
+          changeNavPage('listtype')
+          $api.text(title,'壹味-星店')
+      }
+      if(ret.index==2){
+          changeNavPage('mine')
+          $api.text(title,'壹味-开啦')
+      }
+      if(ret.index==3){
+        api.openFrame({
+            name: 'user',
+               bounces: true,
+            url: './html/user.html',
+            bounces:false,
+            rect: {
+                x: 0,
+                y: 75,
+                w: 'auto',
+                h: api.winHeight-135
+            },
+            pageParam: {
+                name: 'test'
+            },
+            bgColor: 'rgba(0,0,0,0)',
+            vScrollBarEnabled: true,
+            hScrollBarEnabled: true
+        });
+          $api.text(title,'壹味-我的')
+      }
+
+  });
+    };
+</script>
+</html>

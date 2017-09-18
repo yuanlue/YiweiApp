@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+      <title>title</title>
+      <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+  </head>
+  <style>
+  .user{
+    background:linear-gradient(to top right,#ff7b10, #efc210);
+    height:170px;
+    padding-top:30px;
+    box-sizing: border-box;
+  }
+  [v-cloak]{
+    display: none;
+  }
+  .user h1 {
+    text-align: center;
+  }
+.user h1 img{
+  width:80px;
+  border-radius: 10px;
+}
+.user h1 p{
+  color:white;
+  font-size:12px;
+}
+ul li{
+  padding:0 10px;
+  line-height: 50px;
+  border-bottom:1px solid #eee;
+}
+  </style>
+  <body>
+    <div  class="userCener" v-cloak>
+        <p v-if="!user.id">您还未登录，请先<a href="#" @click="login()">登录</a></p>
+        <div  v-if="user.id" class="user">
+          <h1>
+            <img v-bind:src="person.img" >
+            <p>欢迎你,{{person.username}}</p>
+          </h1>
+            </div>
+          <div v-if="user.id">
+          <ul>
+            <li @click="myInvest()">我的投资</li>
+            <li @click="myShop()">我的店铺</li>
+            <li @click="logout()">登出</li>
+          </ul>
+          </div>
+
+    </div>
+  </body>
+  <script type="text/javascript" src="../script/api.js"></script>
+  <script type="text/javascript" src="../script/vue.js"></script>
+  <script type="text/javascript" src="../script/sha1.js"></script>
+  <script type="text/javascript">
+        function reloadMe(){
+           location.reload();
+         }
+      apiready = function(){
+        var app=new Vue({
+          el: '.userCener',
+          data: {
+            person:[],
+            user:[]
+          },
+          created:function(){
+           var that=this
+            if($api.getStorage('user')){
+              that.user=$api.getStorage('user')
+              var now = Date.now();
+              var appKey = SHA1("A6059380178175"+"UZ"+"67146762-27C1-E14A-1645-EB18063350E9"+"UZ"+now)+"."+now
+              var UILoading = api.require('UILoading');
+                UILoading.keyFrame({
+                  rect: {
+                      w: 80,
+                      h: 100
+                  },
+                  styles: {
+                      bg: 'rgba(0,0,0,0.5)',
+                      corner: 5,
+                      interval: 50,
+                      frame: {
+                          w: 80,
+                          h: 80
+                      }
+                  }
+              });
+              api.ajax({
+                  url: "https://d.apicloud.com/mcm/api/user/"+that.user.userId,
+                 method: 'get',
+                 headers:{
+                   "X-APICloud-AppId": "A6059380178175",
+                   "X-APICloud-AppKey": appKey
+                 },
+                 values:{
+                   data:{
+                     id:that.user.userId
+                   }
+                 }
+               },function(ret,err){
+
+
+                   that.person=ret
+                      UILoading.closeKeyFrame();
+               })
+            }
+
+          },
+        methods:{
+          myInvest:function(){
+            var that=this
+            api.openWin({
+                name: 'myInvest',
+                url: '../html/myInvest.html',
+                pageParam: {
+                    person: that.person
+                }
+            });
+
+          },
+          myShop:function(){
+            var that=this
+            api.openWin({
+                name: 'myShop',
+                url: '../html/myShop.html',
+                pageParam: {
+                    person: that.person
+                }
+            });
+          },
+          login:function(){
+            api.openWin({
+                name: 'login',
+                url: '../html/login.html',
+            });
+          },
+          logout:function(){
+            var that=this
+            var dialogBox = api.require('dialogBox');
+            dialogBox.alert({
+            texts: {
+                title: '确认',
+                content: '确定注销当前用户吗？',
+                rightBtnTitle: '确定',
+                leftBtnTitle: '取消'
+            },
+            styles: {
+                bg: '#fff',
+                w: 300,
+                title: {
+                    marginT: 20,
+                    icon: 'widget://res/gou.png',
+                    iconSize: 40,
+                    titleSize: 18,
+                    titleColor: '#000'
+                },
+                content: {
+                    color: '#000',
+                    size: 14
+                },
+                left: {
+                    marginB: 7,
+                    marginL: 20,
+                    w: 130,
+                    h: 35,
+                    corner: 2,
+                    bg: '#ff7b10',
+                    color:"#fff",
+                    size: 12,
+
+                },
+                right: {
+                    marginB: 7,
+                    marginL: 10,
+                    w: 130,
+                    h: 35,
+                    corner: 2,
+                    bg: '#ff7b10',
+                    color:"#fff",
+                    size: 12
+                }
+            }
+        }, function(ret) {
+            if (ret.eventType == 'left') {
+                dialogBox.close({
+                    dialogName: 'alert'
+                });
+            }
+            else{
+              that.user=[];
+              $api.clearStorage ();
+              dialogBox.close({
+                  dialogName: 'alert'
+              });
+
+            }
+        });
+
+          }
+        }
+        })
+      };
+  </script>
+  </html>

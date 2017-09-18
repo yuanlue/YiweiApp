@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+      <title>title</title>
+      <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+      <style>
+      body{
+        padding:0 10px;
+      }
+      h1{
+        text-align: center;
+        font-size:18px;
+        margin:10px 0;
+      }
+      img{
+        width:100%;
+      }
+     .time{
+       text-align: right;
+     }
+     .shopUser span,.address span,.time span{
+      color:#ff7b10;
+
+     }
+     [v-cloak]{
+       display: none;
+     }
+      </style>
+  </head>
+  <body>
+
+
+    <div id="content" v-cloak>
+        <h1 class="title">{{shopName}}</h1>
+
+        <img v-for="p in imgUrl" v-bind:src="p" alt="">
+        <p class="shopUser">店主：<span>{{shopUser}}</span></p>
+        <p class="address">地址：<span>{{address}}</span></p>
+          <p class="address">联系方式：<span>{{tel}}</span></p>
+            <p class="address">众筹金额：<span>{{count}}元</span></p>
+        <p class="content">简短介绍：{{introduce}}</p>
+        <ul class="history">
+          <li>投资历史：</li>
+          <li v-for="p in history">
+            <p>姓名：{{p.name}}</p>
+            <p>投资金额：{{p.count}}</p>
+          </li>
+        </ul>
+        <p class="time">发布时间：{{createdAt}}</p>
+    </div>
+  </body>
+  <script type="text/javascript" src="../script/api.js"></script>
+  <script type="text/javascript" src="../script/vue.js"></script>
+  <script type="text/javascript">
+      apiready = function(){
+        var app=new Vue({
+          el: '#content',
+          data: {
+              shopName:api.pageParam.obj.shopName,
+              shopUser:api.pageParam.obj.shopUser,
+              imgUrl:api.pageParam.obj.imgUrl,
+              tel:api.pageParam.obj.tel,
+              count:api.pageParam.obj.wangtCount,
+              address:api.pageParam.obj.address,
+              introduce:api.pageParam.obj.introduce,
+              createdAt:api.pageParam.obj.createdAt,
+              history:JSON.parse(api.pageParam.obj.investMan)
+          }
+        })
+      };
+  </script>
+  </html>

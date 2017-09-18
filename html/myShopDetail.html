@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+      <title>title</title>
+      <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+      <style>
+      body{
+        background-color: #eee;
+        min-height: 100vh;
+      }
+
+      img{
+        width:100%;
+
+        display: block;
+        border:1px solid #eee;
+        margin:5px auto;
+      }
+      li{
+        background: #fff;
+        margin-top:10px;
+        padding: 10px 10px;
+        border-bottom:1px solid #ccc;
+      }
+      ul{
+        margin-top:5px;
+        margin-bottom:60px;
+      }
+      [v-cloak]{
+        display: none;
+      }
+      .address{
+        float: right;
+      }
+      .count i{
+        font-style: normal;
+        color:#ff7b10;
+      }
+      .oper{
+        text-align: right;
+      }
+      button{
+        padding:5px 10px;
+        color:white;
+        font-size:14px;
+        margin-right:5px;
+        background-color: #ff7b10;
+      }
+      .del{
+        background-color: #da4f49
+      }
+      .bottom{
+        background-color:#ff7b10;
+        position: fixed;
+        bottom:0;
+        width:100%;
+        text-align: center;
+        line-height:50px;
+        color:white;
+      }
+      .want span{
+        color:#ff7b10
+      }
+      </style>
+  </head>
+  <body>
+    <div id="myShop" v-cloak>
+      <p v-if="list.length<=0">暂无数据</p>
+        <ul>
+          <li v-for="item in list"  >
+            <p class="shopname">店名：{{item.shopName}}</p>
+            <p class="username">店主：{{item.shopUser}}<span class="address">地址:{{item.address}}</span></p>
+            <img v-bind:src="item.imgThumb" v-if="item.imgThumb!=''" >
+            <p class="want">期望筹资金额：<span>{{item.wangtCount}}</span></p>
+            <p class="oper"><button @click="del(item.id)" class="del">删除</button></p>
+          </li>
+        </ul>
+        <div @click="add()" class="bottom">
+          新增店铺
+        </div>
+    </div>
+
+  </body>
+  <script type="text/javascript" src="../script/api.js"></script>
+  <script type="text/javascript" src="../script/vue.js"></script>
+  <script type="text/javascript" src="../script/sha1.js"></script>
+    <script type="text/javascript">
+    function reloadMe(){
+       location.reload();
+     }
+    var now = Date.now();
+    var appKey = SHA1("A6059380178175"+"UZ"+"67146762-27C1-E14A-1645-EB18063350E9"+"UZ"+now)+"."+now
+    window.headers={
+      "X-APICloud-AppId": "A6059380178175",
+      "X-APICloud-AppKey": appKey
+    }
+      apiready = function(){
+        var UILoading = api.require('UILoading');
+
+        var vue=new Vue({
+            el: '#myShop',
+          data:{
+            list:[]
+          },
+          created:function(){
+            UILoading.keyFrame({
+              rect: {
+                  w: 80,
+                  h: 100
+              },
+              styles: {
+                  bg: 'rgba(0,0,0,0.5)',
+                  corner: 5,
+                  interval: 50,
+                  frame: {
+                      w: 80,
+                      h: 80
+                  }
+              }
+          });
+            var that=this
+            id=api.pageParam.person.id
+            api.ajax({
+                url: 'https://d.apicloud.com/mcm/api/user/'+id,
+                method: 'get',
+                headers:headers,
+                data: {
+                }
+            },function(ret, err){
+              shopList=ret.shopList
+              that.person=ret
+              UILoading.closeKeyFrame();
+              shopList.forEach(function(item){
+              api.ajax({
+                  url: 'https://d.apicloud.com/mcm/api/TZlist/'+item,
+                  method: 'get',
+                  headers:headers,
+                  data: {
+                  }
+              },function(ret, err){
+                  if (ret) {
+                    that.list.push(ret)
+
+
+                  } else {
+                  }
+              });
+
+
+              })
+            });
+
+          },
+          methods:{
+            add:function(){
+              var that=this
+              api.openWin({
+                  name: 'addShop',
+                  url: './addShop.html',
+                  pageParam: {
+                      person: that.person
+                  }
+              });
+            },
+            del:function(id){
+              var that=this
+              var dialogBox = api.require('dialogBox');
+              dialogBox.alert({
+              texts: {
+                  title: '确认',
+                  content: '您确定要删除该店吗？',
+                  rightBtnTitle: '确定',
+                  leftBtnTitle: '取消'
+              },
+              styles: {
+                  bg: '#fff',
+                  w: 300,
+                  title: {
+                      marginT: 20,
+                      icon: 'widget://res/gou.png',
+                      iconSize: 40,
+                      titleSize: 18,
+                      titleColor: '#000'
+                  },
+                  content: {
+                      color: '#000',
+                      size: 14
+                  },
+                  left: {
+                      marginB: 7,
+                      marginL: 20,
+                      w: 130,
+                      h: 35,
+                      corner: 2,
+                      bg: '#ff7b10',
+                      color:"#fff",
+                      size: 12,
+
+                  },
+                  right: {
+                      marginB: 7,
+                      marginL: 10,
+                      w: 130,
+                      h: 35,
+                      corner: 2,
+                      bg: '#ff7b10',
+                      color:"#fff",
+                      size: 12
+                  }
+              }
+          }, function(ret) {
+              if (ret.eventType == 'left') {
+                  var dialogBox = api.require('dialogBox');
+                  dialogBox.close({
+                      dialogName: 'alert'
+                  });
+              }
+              else{
+                var dialogBox = api.require('dialogBox');
+                UILoading.keyFrame({
+                  rect: {
+                      w: 80,
+                      h: 100
+                  },
+                  styles: {
+                      bg: 'rgba(0,0,0,0.5)',
+                      corner: 5,
+                      interval: 50,
+                      frame: {
+                          w: 80,
+                          h: 80
+                      }
+                  }
+              });
+
+              var list=that.list
+              var arr=[];
+              for(var i=0;i<list.length;i++){
+                if(list[i].id!=id&&list[i].id){
+                  arr.push(list[i].id)
+                }
+              }
+              api.ajax({
+                  url: 'https://d.apicloud.com/mcm/api/user/'+api.pageParam.person.id,
+                  method: 'put',
+                  headers:headers,
+                  data:{
+                      values:{
+                        shopList:arr
+                      }
+                  }
+              },function(ret, err){
+                    api.ajax({
+                        url: 'https://d.apicloud.com/mcm/api/TZlist/'+id,
+                        method: 'DELETE',
+                        headers:headers,
+                        data: {
+                        }
+                    },function(ret, err){
+                        if (ret) {
+                          UILoading.closeKeyFrame();
+
+                            alert('删除成功')
+                            location.reload();
+
+                        } else {
+                        }
+                    });
+
+              });
+                dialogBox.close({
+                    dialogName: 'alert'
+                });
+
+              }
+          });
+
+
+            }
+          }
+        })
+
+
+      }
+  </script>
+  </html>

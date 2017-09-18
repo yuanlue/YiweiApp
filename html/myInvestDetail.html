@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+      <title>title</title>
+      <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+      <style>
+      body{
+        background:#eee;
+        min-height:100vh;
+      }
+
+      img{
+        width:100%;
+
+        display: block;
+        border:1px solid #eee;
+        margin:5px auto;
+      }
+      li{
+        background: #fff;
+        margin-top:10px;
+        padding: 10px 10px;
+        border-bottom:1px solid #ccc;
+      }
+      ul{
+        margin-top:5px;
+      }
+      [v-cloak]{
+        display: none;
+      }
+      .address{
+        float: right;
+      }
+      .count i{
+        font-style: normal;
+        color:#ff7b10;
+      }
+      </style>
+  </head>
+  <body>
+    <div id="myInvest" v-cloak>
+      <ul>
+        <li v-for="item in list">
+          <p class="shopname">店名：{{item.shopName}}</p>
+          <p class="username">店主：{{item.shopUser}}<span class="address">地址:{{item.address}}</span></p>
+
+          <img v-bind:src="item.imgThumb" v-if="item.imgThumb" >
+        <p class="time">投资时间：{{item.time}}<span class="count">投资金额：<i>{{item.count}}元</i></p></p>
+        </li>
+      </ul>
+    </div>
+
+  </body>
+  <script type="text/javascript" src="../script/api.js"></script>
+  <script type="text/javascript" src="../script/vue.js"></script>
+  <script type="text/javascript" src="../script/sha1.js"></script>
+    <script type="text/javascript">
+    function reloadMe(){
+      alert('shuaxin')
+      window.location.reload();
+    }
+    var now = Date.now();
+    var appKey = SHA1("A6059380178175"+"UZ"+"67146762-27C1-E14A-1645-EB18063350E9"+"UZ"+now)+"."+now
+    window.headers={
+      "X-APICloud-AppId": "A6059380178175",
+      "X-APICloud-AppKey": appKey
+    }
+      apiready = function(){
+
+        var vue=new Vue({
+            el: '#myInvest',
+          data:{
+
+            list:[]
+          },
+          created:function(){
+            var that=this
+            api.ajax({
+                url: 'https://d.apicloud.com/mcm/api/user/'+api.pageParam.person.id,
+                method: 'get',
+                headers:headers,
+            },function(ret, err){
+                if (ret) {
+
+                    that.shopid=ret.ShopId
+                    that.shopid=JSON.parse(  that.shopid)
+                    that.shopid.forEach(function(item){
+                        api.ajax({
+                            url: 'https://d.apicloud.com/mcm/api/TZlist/'+item.id,
+                            method: 'get',
+                            headers:headers,
+                            data: {
+
+                            }
+                        },function(ret, err){
+                            if (ret) {
+                              if(ret.id){
+                                ret.count=item.count
+                                ret.time=item.time
+                                that.list.push(ret)
+                              }
+
+
+                            } else {
+                            }
+                        });
+                      })
+                } else {
+                    alert( JSON.stringify( err ) );
+                }
+            });
+
+
+
+            api.setCustomRefreshHeaderInfo({
+                bgColor: '#eee',
+                tips: {
+                    pull: '下拉刷新',
+                    threshold: '松开立即刷新',
+                    load: '正在刷新'
+                }
+            }, function() {
+              that.list=[]
+              that.shopid.forEach(function(item){
+                  api.ajax({
+                      url: 'https://d.apicloud.com/mcm/api/TZlist/'+item.id,
+                      method: 'get',
+                      headers:headers,
+                      data: {
+
+                      }
+                  },function(ret, err){
+                      if (ret) {
+                        if(ret.id){
+                          ret.count=item.count
+                          ret.time=item.time
+                          that.list.push(ret)
+                          api.refreshHeaderLoadDone()
+                        }
+
+
+                      } else {
+                      }
+                  });
+                })
+            });
+
+
+          }
+        })
+
+
+      }
+  </script>
+  </html>
